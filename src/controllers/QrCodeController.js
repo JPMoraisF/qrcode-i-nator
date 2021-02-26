@@ -21,7 +21,6 @@ module.exports = {
         short = JSON.stringify(qr._id);
         const id = short.slice(short.length-7, short.length-1);
         qr.id = id;
-
         await qr.save()
         return response.json({qr});
     },
