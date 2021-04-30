@@ -1,20 +1,39 @@
-const { Router } = require('express');
-const QrCodeController = require('../controllers/QrCodeController');
-const UserController = require('../controllers/UserController');
-const UrlController = require('../controllers/UrlController');
+const { Router } = require("express");
+const UrlController = require("../controllers/UrlController");
+const authentication = require("../controllers/authController");
+const { check, validationResult } = require("express-validator");
 
-const routes = Router();
+const rootRoutes = Router();
 
-routes.get('/users', UserController.index);
-routes.post('/users', UserController.store);
-routes.delete('/users', UserController.delete);
-routes.put('/users', UserController.update);
+// Rotas de login e cadastro.
+rootRoutes.post(
+  "/register",
+  [
+    check("email", "Valid email address required").isEmail(),
+    check("password", "Password required").exists(),
+    check("password", "Password must be at least 8 characters long").isLength({
+      min: 8,
+    }),
+    check("name", "Name must not be blank").exists(),
+    check("name", "Name must be at least 6 characters long").isLength({
+      min: 6,
+    }),
+  ],
+  authentication.register
+);
+rootRoutes.post(
+  "/login",
+  [
+    check("email", "Valid email address required").isEmail(),
+    check("password", "Password required").exists(),
+    check("password", "Password must be at least 8 characters long").isLength({
+      min: 8,
+    }),
+  ],
+  authentication.authentication
+);
 
-routes.get('/qrcode', QrCodeController.index);
-routes.post('/qrcode', QrCodeController.store);
-routes.put('/qrcode/:id', QrCodeController.update);
-routes.delete('/qrcode/:id', QrCodeController.delete);
+// Rota de redirecionamento
+rootRoutes.get("/:id", UrlController.handleRequest);
 
-routes.get('/:id', UrlController.handleRequest);
-
-module.exports = routes;
+module.exports = rootRoutes;

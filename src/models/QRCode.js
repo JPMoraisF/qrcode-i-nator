@@ -1,23 +1,26 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-const QRCodeSchema = new mongoose.Schema({
-    id: {
-        type: String,
-        required: "ID é obrigatório"
-    },
+const QRCodeSchema = new mongoose.Schema(
+  {
     name: {
-        type: String,
+      type: String,
     },
     url: {
-        type: String,
-        required: "URL é obrigatório"
+      type: String,
+      required: "URL é obrigatório",
     },
     visitors: {
-        type: Number,
-        required: "Visitantes da URL!"
-    }
-}, {
-    timestamps: true
-});
+      type: Number,
+      required: "Visitantes da URL!",
+    },
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
 
-module.exports = mongoose.model('QRCode', QRCodeSchema);
+module.exports = mongoose.model("QRCode", QRCodeSchema);
