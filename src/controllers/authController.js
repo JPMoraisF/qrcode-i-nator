@@ -1,11 +1,11 @@
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const authConfig = require('../config/auth');
+const secret = process.env.SECRET
 const { validationResult } = require('express-validator');
 
 function generateToken(params = {}) {
-    return jwt.sign(params, authConfig.secret, {
+    return jwt.sign(params, secret, {
         expiresIn: 86400,
     });
 }
