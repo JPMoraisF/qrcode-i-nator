@@ -1,6 +1,6 @@
 const { Router } = require("express");
 const UrlController = require("../controllers/UrlController");
-//const authConfig = process.env.SECRET
+const authentication = require("../controllers/authController");
 const { check, validationResult } = require("express-validator");
 
 const rootRoutes = Router();
