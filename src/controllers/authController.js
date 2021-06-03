@@ -1,13 +1,12 @@
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const secret = process.env.SECRET
+const secret = process.env.SECRET;
 const { validationResult } = require('express-validator');
 
 function generateToken(params = {}) {
-    return jwt.sign(params, secret, {
-        expiresIn: 86400,
-    });
+    return jwt.sign(params, secret,
+        {expiresIn: 3600});
 }
 
 
@@ -24,7 +23,8 @@ module.exports = {
             }
             user.password = undefined;
 
-            return response.send({ user, token: generateToken({ id: user.id }) });
+            const token = generateToken({id: user.id});
+            return response.header('auth-token', token).send({ user });
         }
         catch (err) {
             return response.send({ err });
@@ -43,9 +43,9 @@ module.exports = {
             }
             db_user = await User.create(request.body);
             db_user.password = undefined;
-            return response.send({
-                db_user,
-                token: generateToken({id: db_user.id})
+            const token = generateToken({id: db_user.id})
+            return response.header('auth-token', token).send({
+                db_user
             });
         } catch (err) {
             return response.send({ err });

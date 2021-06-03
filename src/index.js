@@ -6,7 +6,9 @@ const mongoose = require('mongoose');
 const express = require('express');
 const cors = require('cors');
 const rootRoutes = require('./routes/routes');
-const userRoutes = require('./routes/user');
+const userRoutes = require('./routes/userRoutes');
+const codeRoutes = require('./routes/codeRoutes');
+
 
 const app = express();
 
@@ -17,6 +19,7 @@ app.use(express.urlencoded({
 app.use(cors());
 app.use('/api/', rootRoutes);
 app.use('/api/user', userRoutes);
+app.use('/api/code', codeRoutes);
 app.listen(process.env.PORT || 8080)
 
 const DATABASE_URL = process.env.APP_DATABASE_URL;

@@ -5,10 +5,10 @@ const ObjectId = require('mongodb').ObjectId;
 module.exports = {
   async store(request, response) {
     const { url, name = url } = request.body;
-    const { id } = request.params;
+    const { userId } = request.params;
 
     try {
-      const user = await User.findOne({ _id: id });
+      const user = await User.findOne({ _id: userId });
       if (!user) {
         return response.status(404).json({ message: "user not found!" });
       }
@@ -17,30 +17,57 @@ module.exports = {
         url,
         name,
         visitors: 0,
-        user: id,
+        user: userId,
       });
-      
-      // Na verdade aqui poderia ser um save na variável ao invés 
-      //de um updateOne no model, mas deixa assim, cansei já
-
-      await User.updateOne(
-        { _id: user.id },
-        {
-          $push: { qrcode: qr._id },
-        },
-        {upsert: true}
-      );
       
       return response.json(qr);
     } catch (err) {
-      return response.send(err);
+      return response.send({err});
     }
   },
 
+
+  async update(request, response) {
+    const { codeId, userId } = request.params;
+    var db_code = await QRCode.findOne({ _id: codeId, user: userId });
+    if (!db_code) return response.status(404).json({ message: "QRCode not found!" });
+      
+    db_code = await QRCode.updateOne(
+      { _id: codeId },
+      {
+        $set: {
+          "name": request.body.name,
+          "url": request.body.url
+        },
+        $currentDate: { lastModified: true },
+      }
+    );
+
+    return response.json({message: "Updated successful"});
+    
+  },
+
+  async blankIt(request, response) {
+    const { codeId, userId } = request.params;
+    var db_code = await QRCode.findOne({ _id: codeId, user: userId });
+    if(!db_code) return response.status(404).json({ message: "QRCode not found!" });
+    await QRCode.updateOne({_id: codeId}, {
+      $set: {
+        url: "",
+        name: "Sem Nome",
+        visitors: 0,
+      }
+    });
+    return response.send('Blanked Document');
+  },
+
+
+
+  //Não tem mais essa função
   async search(request, response) {
-    const { id } = request.params;
+    const { codeId } = request.params;
     try {
-      var db_code = await QRCode.findOne({ id });
+      var db_code = await QRCode.findOne({ codeId });
       if (!db_code)
         return response.status(400).json({ message: "Qrcode not found" });
 
@@ -50,34 +77,22 @@ module.exports = {
     }
   },
 
-  async update(request, response) {
-    const { id } = request.params;
-    var db_code = await QRCode.findOne({ id });
-    if (db_code) {
-      for (var [key, value] of Object.entries(request.body)) {
-        db_code = await QRCode.updateOne(
-          { id },
-          {
-            $set: request.body,
-            $currentDate: { lastModified: true },
-          }
-        );
-      }
-      return response.json(db_code);
-    } else {
-      return response.status(404).json({ message: "code not found" });
-    }
-  },
+
 
   // não deletar QR Code, mas deixar ele "vazio"
-  //precisamos alterar o user após deletar o qrcode
   async delete(request, response) {
-    const { id } = request.params;
-    var db_code = await QRCode.deleteOne({ _id: id });
-    if (db_code.deletedCount === 0) {
-      return response.status(404).json({ message: "code not found!" });
+    const { codeId, userId } = request.params;
+    var db_code = await QRCode.updateOne({_id: codeId, user: userId}, {
+      $set: {
+        url: "",
+        name: "Sem Nome",
+        visitors: 0,
+      }
+    });
+    if (!db_code) {
+      return response.status(404).json({ message: "QRCode not found!" });
     } else {
       return response.json(db_code);
     }
-  },
+  }
 };
