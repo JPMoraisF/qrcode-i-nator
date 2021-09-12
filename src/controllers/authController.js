@@ -1,3 +1,6 @@
+require('dotenv').config({  
+    path: process.env.NODE_ENV=== "DEVELOPMENT" ? ".env.local" : ".env"
+});
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
